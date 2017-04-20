@@ -9,8 +9,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.lcpoletto.tasks.model.Task;
 
 /**
@@ -19,14 +17,13 @@ import com.lcpoletto.tasks.model.Task;
  * @author Luis Carlos Poletto
  *
  */
-public class ListTasks implements RequestHandler<String, List<Task>> {
+public class ListTasks {
 
     private static final Logger logger = Logger.getLogger(ListTasks.class);
 
-    @Override
-    public List<Task> handleRequest(String input, Context context) {
+    public List<Task> handleRequest(String input) {
         logger.debug("Listing tasks from persistence layer.");
-        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();
+        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         final DynamoDBMapper mapper = new DynamoDBMapper(client);
         /*
          * as dynamo db returns pages of results when doing blanket scans we
