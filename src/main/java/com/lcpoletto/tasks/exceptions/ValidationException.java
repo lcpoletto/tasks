@@ -11,9 +11,9 @@ package com.lcpoletto.tasks.exceptions;
  */
 public class ValidationException extends Exception {
 
-	private static final long serialVersionUID = -641540785468580102L;
+    private static final long serialVersionUID = -641540785468580102L;
 
-	public ValidationException(String message) {
-		super(message);
-	}
+    public ValidationException(String message) {
+        super(message);
+    }
 }

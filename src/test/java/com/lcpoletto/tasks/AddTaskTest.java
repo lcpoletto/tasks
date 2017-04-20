@@ -27,63 +27,63 @@ import com.lcpoletto.tasks.model.Task;
 @PrepareForTest({ AmazonDynamoDBClientBuilder.class })
 public class AddTaskTest {
 
-	@Mock
-	private AmazonDynamoDB mockClient;
+    @Mock
+    private AmazonDynamoDB mockClient;
 
-	@Test
-	public void testInvalidInput() {
-		final AddTask lambda = new AddTask();
-		try {
-			lambda.handleRequest(null);
-		} catch (ValidationException e) {
-			Assert.assertTrue(e.getMessage().contains("null"));
-		}
+    @Test
+    public void testInvalidInput() {
+        final AddTask lambda = new AddTask();
+        try {
+            lambda.handleRequest(null);
+        } catch (ValidationException e) {
+            Assert.assertTrue(e.getMessage().contains("null"));
+        }
 
-		final Task input = new Task();
-		try {
-			lambda.handleRequest(input);
-		} catch (ValidationException e) {
-			Assert.assertTrue(e.getMessage().contains("description"));
-		}
+        final Task input = new Task();
+        try {
+            lambda.handleRequest(input);
+        } catch (ValidationException e) {
+            Assert.assertTrue(e.getMessage().contains("description"));
+        }
 
-		try {
-			input.setDescription("Test description.");
-			lambda.handleRequest(input);
-		} catch (ValidationException e) {
-			Assert.assertFalse(e.getMessage().contains("description"));
-			Assert.assertTrue(e.getMessage().contains("priority"));
-		}
+        try {
+            input.setDescription("Test description.");
+            lambda.handleRequest(input);
+        } catch (ValidationException e) {
+            Assert.assertFalse(e.getMessage().contains("description"));
+            Assert.assertTrue(e.getMessage().contains("priority"));
+        }
 
-		try {
-			input.setPriority(-1);
-			lambda.handleRequest(input);
-		} catch (ValidationException e) {
-			Assert.assertFalse(e.getMessage().contains("description"));
-			Assert.assertTrue(e.getMessage().contains("priority"));
-		}
+        try {
+            input.setPriority(-1);
+            lambda.handleRequest(input);
+        } catch (ValidationException e) {
+            Assert.assertFalse(e.getMessage().contains("description"));
+            Assert.assertTrue(e.getMessage().contains("priority"));
+        }
 
-		try {
-			input.setPriority(11);
-			lambda.handleRequest(input);
-		} catch (ValidationException e) {
-			Assert.assertFalse(e.getMessage().contains("description"));
-			Assert.assertTrue(e.getMessage().contains("priority"));
-		}
-	}
+        try {
+            input.setPriority(11);
+            lambda.handleRequest(input);
+        } catch (ValidationException e) {
+            Assert.assertFalse(e.getMessage().contains("description"));
+            Assert.assertTrue(e.getMessage().contains("priority"));
+        }
+    }
 
-	@Test
-	public void testValid() throws ValidationException {
-		final AddTask lambda = new AddTask();
-		final Task input = new Task();
-		input.setDescription("Test description");
-		input.setPriority(5);
+    @Test
+    public void testValid() throws ValidationException {
+        final AddTask lambda = new AddTask();
+        final Task input = new Task();
+        input.setDescription("Test description");
+        input.setPriority(5);
 
-		PowerMock.mockStatic(AmazonDynamoDBClientBuilder.class);
-		EasyMock.expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockClient);
-		PowerMock.replay(AmazonDynamoDBClientBuilder.class);
+        PowerMock.mockStatic(AmazonDynamoDBClientBuilder.class);
+        EasyMock.expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockClient);
+        PowerMock.replay(AmazonDynamoDBClientBuilder.class);
 
-		final Task result = lambda.handleRequest(input);
-		Assert.assertNotNull(result.getId());
-		PowerMock.verify(AmazonDynamoDBClientBuilder.class);
-	}
+        final Task result = lambda.handleRequest(input);
+        Assert.assertNotNull(result.getId());
+        PowerMock.verify(AmazonDynamoDBClientBuilder.class);
+    }
 }
