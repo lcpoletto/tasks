@@ -1,17 +1,17 @@
-/**
- * 
- */
 package com.lcpoletto.tasks;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.powermock.api.easymock.PowerMock.mockStatic;
+import static org.powermock.api.easymock.PowerMock.replayAll;
+import static org.powermock.api.easymock.PowerMock.verifyAll;
 
-import org.easymock.EasyMock;
 import org.easymock.Mock;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.easymock.PowerMock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -49,38 +49,36 @@ public class DeleteTaskTest {
     @Test
     public void testNotFound() throws ValidationException {
         final DeleteTask lambda = new DeleteTask();
-        PowerMock.mockStatic(AmazonDynamoDBClientBuilder.class);
-        EasyMock.expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockClient);
-        EasyMock.expect(mockClient.getItem(EasyMock.anyObject())).andReturn(new GetItemResult());
-        EasyMock.replay(mockClient);
-        PowerMock.replay(AmazonDynamoDBClientBuilder.class);
+        mockStatic(AmazonDynamoDBClientBuilder.class);
+        expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockClient);
+        expect(mockClient.getItem(anyObject())).andReturn(new GetItemResult());
+        replay(mockClient);
+        replayAll();
 
-        final String result = lambda.handleRequest("Should receive back a not found.");
-        Assert.assertEquals("NOT_FOUND", result);
-        PowerMock.verify(AmazonDynamoDBClientBuilder.class);
-        EasyMock.verify(mockClient);
+        final String result = lambda.handleRequest("non_existing");
+        assertEquals("NOT_FOUND", result);
+        verifyAll();
+        verify(mockClient);
     }
 
     @Test
     public void testSuccess() throws ValidationException {
         final DeleteTask lambda = new DeleteTask();
-        PowerMock.mockStatic(AmazonDynamoDBClientBuilder.class);
-        EasyMock.expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockClient);
+        mockStatic(AmazonDynamoDBClientBuilder.class);
+        expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockClient);
 
-        final Map<String, AttributeValue> item = new HashMap<>();
-        item.put("id", new AttributeValue("this_id_exists"));
         final GetItemResult itemResult = new GetItemResult();
-        itemResult.setItem(item);
+        itemResult.addItemEntry("id", new AttributeValue("this_id_exists"));
 
-        EasyMock.expect(mockClient.getItem(EasyMock.anyObject())).andReturn(itemResult);
-        EasyMock.expect(mockClient.deleteItem(EasyMock.anyObject())).andReturn(null);
-        EasyMock.replay(mockClient);
-        PowerMock.replay(AmazonDynamoDBClientBuilder.class);
+        expect(mockClient.getItem(anyObject())).andReturn(itemResult);
+        expect(mockClient.deleteItem(anyObject())).andReturn(null);
+        replay(mockClient);
+        replayAll();
 
         final String result = lambda.handleRequest("this_id_exists");
-        Assert.assertEquals("SUCCESS", result);
-        PowerMock.verify(AmazonDynamoDBClientBuilder.class);
-        EasyMock.verify(mockClient);
+        assertEquals("SUCCESS", result);
+        verifyAll();
+        verify(mockClient);
     }
 
 }

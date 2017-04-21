@@ -1,5 +1,6 @@
 package com.lcpoletto.tasks;
 
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -9,15 +10,11 @@ import static org.powermock.api.easymock.PowerMock.mockStatic;
 import static org.powermock.api.easymock.PowerMock.replayAll;
 import static org.powermock.api.easymock.PowerMock.verifyAll;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.easymock.EasyMock;
 import org.easymock.Mock;
 import org.junit.After;
 import org.junit.Before;
@@ -30,23 +27,25 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
-import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
-import com.lcpoletto.tasks.model.Task;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
+import com.amazonaws.services.simpleemail.model.SendEmailResult;
 
 /**
- * Test fixture for {@link ListTasks}.
+ * Test fixture for {@link SendTasks}.
  * 
- * @author Luis.Poletto
+ * @author Luis Carlos Poletto
  *
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ AmazonDynamoDBClientBuilder.class })
-public class ListTasksTest {
-
-    private static final DateFormat ISO8601FORMAT = new ISO8601DateFormat();
+@PrepareForTest({ AmazonDynamoDBClientBuilder.class, AmazonSimpleEmailServiceClientBuilder.class })
+public class SendTasksTest {
 
     @Mock
-    private AmazonDynamoDB mockClient;
+    private AmazonDynamoDB mockDynamo;
+
+    @Mock
+    private AmazonSimpleEmailService mockSimpleEmailService;
 
     /**
      * Every test we do here we are calling these mocked methods at least once,
@@ -55,7 +54,8 @@ public class ListTasksTest {
     @Before
     public void setup() {
         mockStatic(AmazonDynamoDBClientBuilder.class);
-        expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockClient);
+        mockStatic(AmazonSimpleEmailServiceClientBuilder.class);
+        expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockDynamo);
     }
 
     /**
@@ -69,47 +69,35 @@ public class ListTasksTest {
 
     @Test
     public void testEmptyResults() {
-        expect(mockClient.scan(EasyMock.anyObject())).andReturn(new ScanResult());
-        replay(mockClient);
+        expect(mockDynamo.scan(anyObject())).andReturn(new ScanResult());
+        replay(mockDynamo);
         replayAll();
 
-        final ListTasks lambda = new ListTasks();
-        final List<Task> result = lambda.handleRequest(null);
+        final SendTasks lambda = new SendTasks();
+        final String result = lambda.handleRequest(null);
         assertNotNull(result);
-        assertEquals(0, result.size());
-        verify(mockClient);
+        assertEquals("SUCCESS", result);
+        verify(mockDynamo);
     }
 
     @Test
-    public void testNonEmptyResults() {
-        expect(mockClient.scan(EasyMock.anyObject())).andReturn(getUnorderedResults());
-        replay(mockClient);
+    public void testWithResults() {
+        expect(AmazonSimpleEmailServiceClientBuilder.defaultClient()).andReturn(mockSimpleEmailService);
+
+        expect(mockDynamo.scan(anyObject())).andReturn(getUnorderedResults());
+        replay(mockDynamo);
+
+        // we expect 2 calls as we have only 2 different users on the list
+        expect(mockSimpleEmailService.sendEmail(anyObject())).andReturn(new SendEmailResult()).times(2);
+        replay(mockSimpleEmailService);
+
         replayAll();
 
-        final ListTasks lambda = new ListTasks();
-        final List<Task> result = lambda.handleRequest(null);
+        final SendTasks lambda = new SendTasks();
+        final String result = lambda.handleRequest(null);
         assertNotNull(result);
-        assertEquals(3, result.size());
-        verify(mockClient);
-    }
-
-    /**
-     * This test has to fail until part 2 is implemented.
-     */
-    @Test
-    public void testSortedResults() {
-        expect(mockClient.scan(EasyMock.anyObject())).andReturn(getUnorderedResults());
-        replay(mockClient);
-        replayAll();
-
-        final ListTasks lambda = new ListTasks();
-        final List<Task> result = lambda.handleRequest(null);
-        assertNotNull(result);
-        assertEquals(3, result.size());
-        assertEquals("first", result.get(0).getId());
-        assertEquals("second", result.get(1).getId());
-        assertEquals("third", result.get(2).getId());
-        verify(mockClient);
+        assertEquals("SUCCESS", result);
+        verify(mockDynamo);
     }
 
     private ScanResult getUnorderedResults() {
@@ -124,7 +112,7 @@ public class ListTasksTest {
 
         item = new HashMap<>();
         item.put("id", new AttributeValue("third"));
-        item.put("user", new AttributeValue("third@third.com"));
+        item.put("user", new AttributeValue("first@first.com"));
         item.put("description", new AttributeValue("third description"));
         item.put("priority", new AttributeValue().withN("5"));
         items.add(item);
@@ -134,7 +122,6 @@ public class ListTasksTest {
         item.put("user", new AttributeValue("first@first.com"));
         item.put("description", new AttributeValue("first description"));
         item.put("priority", new AttributeValue().withN("5"));
-        item.put("completed", new AttributeValue(ISO8601FORMAT.format(new Date())));
         items.add(item);
 
         result.setItems(items);
