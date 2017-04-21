@@ -13,8 +13,6 @@ import org.apache.log4j.Logger;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig.PaginationLoadingStrategy;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
@@ -33,23 +31,15 @@ import com.lcpoletto.tasks.model.Task;
  * 
  * @author Luis Carlos Poletto
  */
-public class SendTasks {
+public class SendTask {
 
-    private static final Logger logger = Logger.getLogger(SendTasks.class);
+    private static final Logger logger = Logger.getLogger(SendTask.class);
     private static final String SUCCESS = "SUCCESS";
     private static final String DEFAULT_EMAIL_FROM = "noreply@tasks.com";
 
     public String handleRequest(String input) {
         logger.debug("Sending tasks reminder to users.");
-
-        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
-        final DynamoDBMapperConfig mapperConfig = new DynamoDBMapperConfig.Builder()
-                .withPaginationLoadingStrategy(PaginationLoadingStrategy.EAGER_LOADING).build();
-        final DynamoDBMapper mapper = new DynamoDBMapper(client, mapperConfig);
-        final DynamoDBScanExpression expression = new DynamoDBScanExpression()
-                .withFilterExpression("attribute_not_exists(completed)");
-
-        final List<Task> allTasks = mapper.scan(Task.class, expression);
+        final List<Task> allTasks = retrieveAllTasks();
 
         if (allTasks != null && !allTasks.isEmpty()) {
             AmazonSimpleEmailService emailClient = AmazonSimpleEmailServiceClientBuilder.defaultClient();
@@ -125,6 +115,27 @@ public class SendTasks {
         logger.trace(String.format("TASKS_MAIL_FROM: %s", result));
         if (result == null || result.isEmpty()) {
             return DEFAULT_EMAIL_FROM;
+        }
+        return result;
+    }
+
+    private List<Task> retrieveAllTasks() {
+        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
+        final DynamoDBMapper mapper = new DynamoDBMapper(client);
+
+        /*
+         * After testing looks like if we use eager loading dynamo db takes way
+         * more time to return the results, thus I'm iterating on results to
+         * make sure I loaded all of them
+         */
+        final List<Task> paginatedTasks = mapper.scan(Task.class,
+                new DynamoDBScanExpression().withFilterExpression("attribute_not_exists(completed)"));
+
+        final List<Task> result = new LinkedList<>();
+        if (paginatedTasks != null && !paginatedTasks.isEmpty()) {
+            for (final Task task : paginatedTasks) {
+                result.add(task);
+            }
         }
         return result;
     }

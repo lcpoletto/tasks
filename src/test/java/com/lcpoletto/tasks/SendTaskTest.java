@@ -32,14 +32,14 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import com.amazonaws.services.simpleemail.model.SendEmailResult;
 
 /**
- * Test fixture for {@link SendTasks}.
+ * Test fixture for {@link SendTask}.
  * 
  * @author Luis Carlos Poletto
  *
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ AmazonDynamoDBClientBuilder.class, AmazonSimpleEmailServiceClientBuilder.class })
-public class SendTasksTest {
+public class SendTaskTest {
 
     @Mock
     private AmazonDynamoDB mockDynamo;
@@ -73,7 +73,7 @@ public class SendTasksTest {
         replay(mockDynamo);
         replayAll();
 
-        final SendTasks lambda = new SendTasks();
+        final SendTask lambda = new SendTask();
         final String result = lambda.handleRequest(null);
         assertNotNull(result);
         assertEquals("SUCCESS", result);
@@ -93,7 +93,7 @@ public class SendTasksTest {
 
         replayAll();
 
-        final SendTasks lambda = new SendTasks();
+        final SendTask lambda = new SendTask();
         final String result = lambda.handleRequest(null);
         assertNotNull(result);
         assertEquals("SUCCESS", result);
