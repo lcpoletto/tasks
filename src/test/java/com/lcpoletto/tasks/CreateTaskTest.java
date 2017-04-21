@@ -16,7 +16,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.lcpoletto.tasks.exceptions.ValidationException;
+import com.lcpoletto.exceptions.ValidationException;
 import com.lcpoletto.tasks.model.Task;
 
 /**

@@ -19,7 +19,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
-import com.lcpoletto.tasks.exceptions.ValidationException;
+import com.lcpoletto.exceptions.ValidationException;
 
 /**
  * Test fixture for {@link DeleteTask}.
