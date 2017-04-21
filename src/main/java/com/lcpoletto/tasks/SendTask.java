@@ -22,6 +22,7 @@ import com.amazonaws.services.simpleemail.model.Destination;
 import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import com.amazonaws.services.simpleemail.model.SendEmailResult;
+import com.lcpoletto.Utils;
 import com.lcpoletto.tasks.model.Task;
 
 /**
@@ -35,11 +36,10 @@ public class SendTask {
 
     private static final Logger logger = Logger.getLogger(SendTask.class);
     private static final String SUCCESS = "SUCCESS";
-    private static final String DEFAULT_EMAIL_FROM = "noreply@tasks.com";
 
     public String handleRequest(String input) {
         logger.debug("Sending tasks reminder to users.");
-        final List<Task> allTasks = retrieveAllTasks();
+        final List<Task> allTasks = retrieveUncompletedTasks();
 
         if (allTasks != null && !allTasks.isEmpty()) {
             AmazonSimpleEmailService emailClient = AmazonSimpleEmailServiceClientBuilder.defaultClient();
@@ -90,8 +90,8 @@ public class SendTask {
         final Content textBody = new Content().withData(text.toString());
         final Body body = new Body().withText(textBody);
         final Message message = new Message().withSubject(subject).withBody(body);
-        final SendEmailRequest request = new SendEmailRequest().withSource(getMailFrom()).withDestination(destination)
-                .withMessage(message);
+        final SendEmailRequest request = new SendEmailRequest().withSource(Utils.getMailFrom())
+                .withDestination(destination).withMessage(message);
 
         try {
             final SendEmailResult result = emailClient.sendEmail(request);
@@ -104,22 +104,7 @@ public class SendTask {
         return null;
     }
 
-    /**
-     * Helper method which will try to read configuration from environment
-     * variables.
-     * 
-     * @return configured email source or default value
-     */
-    private String getMailFrom() {
-        final String result = System.getenv("TASKS_MAIL_FROM");
-        logger.trace(String.format("TASKS_MAIL_FROM: %s", result));
-        if (result == null || result.isEmpty()) {
-            return DEFAULT_EMAIL_FROM;
-        }
-        return result;
-    }
-
-    private List<Task> retrieveAllTasks() {
+    private List<Task> retrieveUncompletedTasks() {
         final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
         final DynamoDBMapper mapper = new DynamoDBMapper(client);
 
