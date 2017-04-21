@@ -34,14 +34,14 @@ import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.lcpoletto.tasks.model.Task;
 
 /**
- * Test fixture for {@link ListTasks}.
+ * Test fixture for {@link RetrieveTask}.
  * 
  * @author Luis.Poletto
  *
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ AmazonDynamoDBClientBuilder.class })
-public class ListTasksTest {
+public class RetrieveTaskTest {
 
     private static final DateFormat ISO8601FORMAT = new ISO8601DateFormat();
 
@@ -73,7 +73,7 @@ public class ListTasksTest {
         replay(mockClient);
         replayAll();
 
-        final ListTasks lambda = new ListTasks();
+        final RetrieveTask lambda = new RetrieveTask();
         final List<Task> result = lambda.handleRequest(null);
         assertNotNull(result);
         assertEquals(0, result.size());
@@ -86,7 +86,7 @@ public class ListTasksTest {
         replay(mockClient);
         replayAll();
 
-        final ListTasks lambda = new ListTasks();
+        final RetrieveTask lambda = new RetrieveTask();
         final List<Task> result = lambda.handleRequest(null);
         assertNotNull(result);
         assertEquals(3, result.size());
@@ -102,7 +102,7 @@ public class ListTasksTest {
         replay(mockClient);
         replayAll();
 
-        final ListTasks lambda = new ListTasks();
+        final RetrieveTask lambda = new RetrieveTask();
         final List<Task> result = lambda.handleRequest(null);
         assertNotNull(result);
         assertEquals(3, result.size());

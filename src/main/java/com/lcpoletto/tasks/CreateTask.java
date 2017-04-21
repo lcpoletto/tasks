@@ -17,9 +17,9 @@ import com.lcpoletto.tasks.model.Task;
  * @author Luis Carlos Poletto
  * 
  */
-public class AddTask {
+public class CreateTask {
 
-    private static final Logger logger = Logger.getLogger(AddTask.class);
+    private static final Logger logger = Logger.getLogger(CreateTask.class);
 
     public Task handleRequest(final Task input) throws ValidationException {
         validateInput(input);

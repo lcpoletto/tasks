@@ -20,21 +20,21 @@ import com.lcpoletto.tasks.exceptions.ValidationException;
 import com.lcpoletto.tasks.model.Task;
 
 /**
- * Test fixture for {@link AddTask}.
+ * Test fixture for {@link CreateTask}.
  * 
  * @author Luis Carlos Poletto
  *
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ AmazonDynamoDBClientBuilder.class })
-public class AddTaskTest {
+public class CreateTaskTest {
 
     @Mock
     private AmazonDynamoDB mockClient;
 
     @Test
     public void testInvalidInput() {
-        final AddTask lambda = new AddTask();
+        final CreateTask lambda = new CreateTask();
         try {
             lambda.handleRequest(null);
         } catch (ValidationException e) {
@@ -75,7 +75,7 @@ public class AddTaskTest {
 
     @Test
     public void testValid() throws ValidationException {
-        final AddTask lambda = new AddTask();
+        final CreateTask lambda = new CreateTask();
         final Task input = new Task();
         input.setDescription("Test description");
         input.setPriority(5);

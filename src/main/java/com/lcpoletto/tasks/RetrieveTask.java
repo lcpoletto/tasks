@@ -18,9 +18,9 @@ import com.lcpoletto.tasks.model.Task;
  * @author Luis Carlos Poletto
  *
  */
-public class ListTasks {
+public class RetrieveTask {
 
-    private static final Logger logger = Logger.getLogger(ListTasks.class);
+    private static final Logger logger = Logger.getLogger(RetrieveTask.class);
 
     public List<Task> handleRequest(String input) {
         logger.debug("Listing tasks from persistence layer.");
