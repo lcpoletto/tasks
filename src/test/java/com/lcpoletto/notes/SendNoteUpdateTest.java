@@ -20,8 +20,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.OperationType;
-import com.amazonaws.services.dynamodbv2.model.Record;
 import com.amazonaws.services.dynamodbv2.model.StreamRecord;
+import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 
 /**
@@ -45,7 +45,7 @@ public class SendNoteUpdateTest {
     @Test
     public void testNullOrEmpty() {
         lambda.handleRequest(null, null);
-        lambda.handleRequest(Collections.emptyList(), null);
+        lambda.handleRequest(new DynamodbEvent(), null);
         verify(emailClient, never()).sendEmail(any());
     }
 
@@ -57,46 +57,57 @@ public class SendNoteUpdateTest {
 
     @Test
     public void testUpdatedByOwner() {
-        lambda.handleRequest(populateRecord("owner"), null);
+        lambda.handleRequest(populateEvent("owner"), null);
         verify(emailClient, never()).sendEmail(any());
     }
 
     @Test
     public void testUpdatedByUser() {
         Mockito.when(emailClient.sendEmail(any())).thenReturn(null);
-        lambda.handleRequest(populateRecord("user"), null);
+        lambda.handleRequest(populateEvent("user"), null);
         verify(emailClient).sendEmail(any());
     }
 
     /**
-     * Provides a list with records withouth <code>MODIFY</code> as the event
-     * name.
+     * Provides a dynamo db event with list of records withouth
+     * <code>MODIFY</code> as the event name.
      * 
      * @return wrong events for the lambda
      */
-    private List<Record> populateWrongRecord() {
-        final List<Record> result = new ArrayList<>(3);
-        result.add(new Record().withEventName(OperationType.INSERT));
-        result.add(new Record().withEventName(OperationType.REMOVE));
+    private DynamodbEvent populateWrongRecord() {
+        final DynamodbEvent result = new DynamodbEvent();
+        final List<DynamodbEvent.DynamodbStreamRecord> records = new ArrayList<>(3);
+
+        DynamodbEvent.DynamodbStreamRecord record = new DynamodbEvent.DynamodbStreamRecord();
+        record.setEventName(OperationType.INSERT);
+        records.add(record);
+
+        record = new DynamodbEvent.DynamodbStreamRecord();
+        record.setEventName(OperationType.REMOVE);
+        records.add(record);
+
         return result;
     }
 
     /**
-     * Provides a singleton list with a record that was updated by the received
-     * parameter.
+     * Provides a dynamo db event with a singleton list with a record that was
+     * updated by the received parameter.
      * 
      * @param updatedBy
      *            name of the user which updated the record
      * @return event updated by owner
      */
-    private List<Record> populateRecord(final String updatedBy) {
+    private DynamodbEvent populateEvent(final String updatedBy) {
+        final DynamodbEvent result = new DynamodbEvent();
         final StreamRecord streamRecord = new StreamRecord();
         streamRecord.addNewImageEntry("updatedBy", new AttributeValue(updatedBy));
         streamRecord.addNewImageEntry("owner", new AttributeValue("owner"));
         streamRecord.addNewImageEntry("content", new AttributeValue("content"));
-        final Record record = new Record().withEventName(OperationType.MODIFY);
+        final DynamodbEvent.DynamodbStreamRecord record = new DynamodbEvent.DynamodbStreamRecord();
+        record.setEventName(OperationType.MODIFY);
         record.setDynamodb(streamRecord);
-        return Collections.singletonList(record);
+        result.setRecords(Collections.singletonList(record));
+        return result;
     }
 
 }

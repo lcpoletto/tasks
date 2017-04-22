@@ -140,6 +140,7 @@ public class UpdateNoteTest {
         result.addItemEntry("id", new AttributeValue("id"));
         result.addItemEntry("allowChange", new AttributeValue().withN("1"));
         result.addItemEntry("owner", new AttributeValue("owner"));
+        result.addItemEntry("recipient", new AttributeValue("updatedBy"));
         return result;
     }
 }

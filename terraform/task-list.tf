@@ -27,6 +27,10 @@ resource "aws_api_gateway_method_response" "tasks_get_200_response" {
     resource_id = "${aws_api_gateway_resource.tasks_resource.id}"
     http_method = "${aws_api_gateway_method.tasks_get_method.http_method}"
     status_code = 200
+    
+    response_models {
+    	"application/json" = "${aws_api_gateway_model.task_model.name}"
+    }
 }
 
 resource "aws_api_gateway_integration_response" "tasks_get_200_integration_response" {

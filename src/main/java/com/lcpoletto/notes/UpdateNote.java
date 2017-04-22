@@ -115,10 +115,12 @@ public class UpdateNote implements RequestHandler<Note, String> {
         if (retrieved == null) {
             throw new ObjectNotFoundException("Note %s not found.", input.getId());
         }
-        // if this update was not triggered by the owner we need
-        // to verify it's permissions
+        // if this update was not triggered by the owner we need to verify it's
+        // permissions, also, any user other than the recipient is not allowed
+        // to change this note regardless
         if (!retrieved.getOwner().equals(input.getUpdatedBy())) {
-            if (Boolean.FALSE.equals(retrieved.getAllowChange())) {
+            if (Boolean.FALSE.equals(retrieved.getAllowChange())
+                    || !retrieved.getRecipient().equals(input.getUpdatedBy())) {
                 throw new PermissionException("User %s is not allowed to change this note.", input.getUpdatedBy());
             }
         }

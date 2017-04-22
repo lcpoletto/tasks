@@ -68,3 +68,69 @@ resource "aws_api_gateway_model" "task_model" {
 }
 EOF
 }
+
+resource "aws_api_gateway_resource" "notes_resource" {
+    rest_api_id = "${aws_api_gateway_rest_api.tasks_api.id}"
+    parent_id = "${aws_api_gateway_rest_api.tasks_api.root_resource_id}"
+    path_part = "notes"
+}
+
+resource "aws_api_gateway_resource" "note_detail_resource" {
+    rest_api_id = "${aws_api_gateway_rest_api.tasks_api.id}"
+    parent_id = "${aws_api_gateway_resource.notes_resource.id}"
+    path_part = "{id}"
+}
+
+resource "aws_api_gateway_model" "note_model" {
+    rest_api_id = "${aws_api_gateway_rest_api.tasks_api.id}"
+    name = "note"
+    description = "note json schema"
+    content_type = "application/json"
+
+    schema = <<EOF
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "title": "A note",
+    "properties": {
+        "owner": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 254,
+            "title": "Owner",
+            "description": "Note owner's email address"
+        },
+        "recipient": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 254,
+            "title": "Recipient",
+            "description": "Note recipent's email address"
+        },
+        "allowChange": {
+            "type": "boolean",
+            "title": "AllowChange",
+            "description": "Allow recipent to update note"
+        },
+        "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Note content"
+        },
+        "updatedBy": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 254,
+            "title": "UpdatedBy",
+            "description": "Email address of user updating the note"
+        }
+    },
+    "required": [
+        "owner",
+        "recipient",
+        "content",
+        "allowChange"
+    ]
+}
+EOF
+}

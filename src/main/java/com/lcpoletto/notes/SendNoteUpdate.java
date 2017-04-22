@@ -11,6 +11,8 @@ import com.amazonaws.services.dynamodbv2.model.OperationType;
 import com.amazonaws.services.dynamodbv2.model.Record;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
+import com.amazonaws.services.lambda.runtime.events.DynamodbEvent.DynamodbStreamRecord;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import com.amazonaws.services.simpleemail.model.Body;
@@ -31,7 +33,7 @@ import com.lcpoletto.Utils;
  * @author Luis Carlos Poletto
  *
  */
-public class SendNoteUpdate implements RequestHandler<List<Record>, String> {
+public class SendNoteUpdate implements RequestHandler<DynamodbEvent, String> {
 
     private static final Logger logger = Logger.getLogger(SendNoteUpdate.class);
 
@@ -68,9 +70,10 @@ public class SendNoteUpdate implements RequestHandler<List<Record>, String> {
      * @return <code>SUCCESS</code> when processing goes well
      */
     @Override
-    public String handleRequest(final List<Record> records, final Context context) {
-        logger.debug(String.format("Received stream event: %s", records));
-        if (records != null) {
+    public String handleRequest(final DynamodbEvent event, final Context context) {
+        logger.debug(String.format("Received stream event: %s", event));
+        if (event != null && event.getRecords() != null) {
+            final List<DynamodbStreamRecord> records = event.getRecords();
             for (final Record record : records) {
                 // even though the configuration we're going to do on the lambda
                 // trigger is to only call this when there is an update, it
