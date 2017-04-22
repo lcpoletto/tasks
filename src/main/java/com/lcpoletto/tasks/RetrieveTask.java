@@ -1,6 +1,5 @@
 package com.lcpoletto.tasks;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,6 +9,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.lcpoletto.Utils;
 import com.lcpoletto.tasks.model.Task;
 
@@ -19,7 +20,7 @@ import com.lcpoletto.tasks.model.Task;
  * @author Luis Carlos Poletto
  *
  */
-public class RetrieveTask {
+public class RetrieveTask implements RequestHandler<String, String> {
 
     private static final Logger logger = Logger.getLogger(RetrieveTask.class);
 
@@ -51,9 +52,23 @@ public class RetrieveTask {
      * 
      * @param input
      *            this input is ignored by the function
-     * @return the sorted list of all tasks
+     * @param context
+     *            aws lambda context
+     * @return json representation of the sorted array of tasks
      */
-    public List<Task> handleRequest(String input) {
+    @Override
+    public String handleRequest(String input, Context context) {
+        return Utils.toJson(handleRequest());
+    }
+
+    /**
+     * Actual function which will do all the fetching for the lambda and return
+     * the sorted array, from here it's converted into json to be returned to
+     * the user.
+     * 
+     * @return sorted task array
+     */
+    private Task[] handleRequest() {
         logger.debug("Listing tasks from persistence layer.");
         /*
          * After testing looks like if we use eager loading dynamo db takes way
@@ -75,6 +90,6 @@ public class RetrieveTask {
         logger.debug(String.format("Found %d tasks.", unsortedTaskList.size()));
         final Task[] result = unsortedTaskList.toArray(new Task[unsortedTaskList.size()]);
         Utils.mergeSort(result);
-        return Arrays.asList(result);
+        return result;
     }
 }

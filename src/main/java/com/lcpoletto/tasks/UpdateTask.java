@@ -8,6 +8,9 @@ import org.apache.log4j.Logger;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.lcpoletto.exceptions.ObjectNotFoundException;
 import com.lcpoletto.exceptions.ValidationException;
 import com.lcpoletto.tasks.model.Task;
 
@@ -17,7 +20,7 @@ import com.lcpoletto.tasks.model.Task;
  * @author Luis Carlos Poletto
  *
  */
-public class UpdateTask {
+public class UpdateTask implements RequestHandler<Task, String> {
 
     private static final Logger logger = Logger.getLogger(UpdateTask.class);
 
@@ -48,16 +51,24 @@ public class UpdateTask {
      * 
      * @param input
      *            task to be updated
-     * @return the updated task with new values
+     * @param context
+     *            aws lambda context information
+     * @return
      * @throws ValidationException
      *             if any validation error occurs
+     * @throws ObjectNotFoundException
+     *             if the object being updated is not on persistence layer
      */
-    public Task handleRequest(Task input) throws ValidationException {
+    @Override
+    public String handleRequest(Task input, Context context) {
         logger.debug(String.format("Updating task: %s", input));
         validateInput(input);
+        if (dynamoMapper.load(input) == null) {
+            throw new ObjectNotFoundException("Task %s was not found.", input.getId());
+        }
         dynamoMapper.save(input);
         logger.debug(String.format("Updated with success: %s", input));
-        return input;
+        return "SUCCESS";
     }
 
     /**
@@ -68,7 +79,7 @@ public class UpdateTask {
      * @throws ValidationException
      *             if any value is missing or out of range
      */
-    private void validateInput(final Task input) throws ValidationException {
+    private void validateInput(final Task input) {
         logger.debug(String.format("Validating for update: %s", input));
         if (input == null) {
             throw new ValidationException("Input can't be null.");

@@ -8,6 +8,9 @@ import org.apache.log4j.Logger;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.lcpoletto.exceptions.ObjectNotFoundException;
 import com.lcpoletto.exceptions.ValidationException;
 import com.lcpoletto.tasks.model.Task;
 
@@ -17,11 +20,10 @@ import com.lcpoletto.tasks.model.Task;
  * @author Luis Carlos Poletto
  *
  */
-public class DeleteTask {
+public class DeleteTask implements RequestHandler<String, String> {
 
     private static final Logger logger = Logger.getLogger(DeleteTask.class);
     private static final String SUCCESS = "SUCCESS";
-    private static final String NOT_FOUND = "NOT_FOUND";
 
     private DynamoDBMapper dynamoMapper;
 
@@ -50,17 +52,18 @@ public class DeleteTask {
      * 
      * @param taskId
      *            task to be deleted
+     * @param context
+     *            aws lambda context
      * @return <code>SUCCESS</code> if deleted with success
      *         <code>NOT_FOUND</code> if task didn't exist
      */
-    public String handleRequest(String taskId) throws ValidationException {
+    @Override
+    public String handleRequest(String taskId, Context context) {
         logger.debug(String.format("Deleting task %s", taskId));
         validateInput(taskId);
         final Task retrieved = dynamoMapper.load(Task.class, taskId);
         if (retrieved == null) {
-            logger.info(String.format("Task %s not found.", taskId));
-            // TODO: maybe here we could map to a 404 on the API gateway
-            return NOT_FOUND;
+            throw new ObjectNotFoundException("Task %s not found.", taskId);
         }
         dynamoMapper.delete(retrieved);
         // if no error is thrown by the delete above it means it was succesful

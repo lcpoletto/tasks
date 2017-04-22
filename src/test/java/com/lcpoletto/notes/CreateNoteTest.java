@@ -36,55 +36,55 @@ public class CreateNoteTest {
     }
 
     @Test(expected = ValidationException.class)
-    public void testNull() throws ValidationException {
-        lambda.handleRequest(null);
+    public void testNull() {
+        lambda.handleRequest(null, null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testEmpty() throws ValidationException {
-        lambda.handleRequest(new Note());
+    public void testEmpty() {
+        lambda.handleRequest(new Note(), null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testWithId() throws ValidationException {
+    public void testWithId() {
         final Note input = populateNote();
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testWithoutAllowChange() throws ValidationException {
+    public void testWithoutAllowChange() {
         final Note input = populateNote();
         input.setAllowChange(null);
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testWithoutContent() throws ValidationException {
+    public void testWithoutContent() {
         final Note input = populateNote();
         input.setContent(null);
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testWithoutOwner() throws ValidationException {
+    public void testWithoutOwner() {
         final Note input = populateNote();
         input.setOwner(null);
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testWithoutRecipient() throws ValidationException {
+    public void testWithoutRecipient() {
         final Note input = populateNote();
         input.setRecipient(null);
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
     }
 
     @Test
-    public void testSuccess() throws ValidationException {
+    public void testSuccess() {
         when(mockClient.putItem(any())).thenReturn(new PutItemResult());
         final Note input = populateNote();
         input.setId(null);
-        final Note created = lambda.handleRequest(input);
+        final Note created = lambda.handleRequest(input, null);
         assertNotNull(created.getId());
         verify(mockClient).putItem(any());
     }

@@ -6,14 +6,15 @@ package com.lcpoletto.exceptions;
 import static java.lang.String.format;
 
 /**
- * Exception class to represent a validation failure.
+ * Exception class which will be thrown when the object can't be found on the
+ * persistence layer.
  * 
  * @author Luis Carlos Poletto
  *
  */
-public class ValidationException extends RuntimeException {
+public class ObjectNotFoundException extends RuntimeException {
 
-    private static final long serialVersionUID = -641540785468580102L;
+    private static final long serialVersionUID = -6665186190115162032L;
 
     /**
      * Main constructor which uses {@link String#format(String, Object...)} to
@@ -35,7 +36,8 @@ public class ValidationException extends RuntimeException {
      * @param args
      *            formar arguments
      */
-    public ValidationException(String format, Object... args) {
-        super(format("[%s]: %s", ValidationException.class.getSimpleName(), format(format, args)));
+    public ObjectNotFoundException(String format, Object... args) {
+        super(format("[%s]: %s", ObjectNotFoundException.class.getSimpleName(), format(format, args)));
     }
+
 }

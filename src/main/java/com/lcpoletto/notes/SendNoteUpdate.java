@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 
 import com.amazonaws.services.dynamodbv2.model.OperationType;
 import com.amazonaws.services.dynamodbv2.model.Record;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import com.amazonaws.services.simpleemail.model.Body;
@@ -29,7 +31,7 @@ import com.lcpoletto.Utils;
  * @author Luis Carlos Poletto
  *
  */
-public class SendNoteUpdate {
+public class SendNoteUpdate implements RequestHandler<List<Record>, String> {
 
     private static final Logger logger = Logger.getLogger(SendNoteUpdate.class);
 
@@ -61,9 +63,12 @@ public class SendNoteUpdate {
      * 
      * @param records
      *            events created from dynamo db streams
+     * @param context
+     *            aws lambda context
      * @return <code>SUCCESS</code> when processing goes well
      */
-    public String handleRequest(final List<Record> records) {
+    @Override
+    public String handleRequest(final List<Record> records, final Context context) {
         logger.debug(String.format("Received stream event: %s", records));
         if (records != null) {
             for (final Record record : records) {

@@ -3,10 +3,14 @@
  */
 package com.lcpoletto;
 
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
 import com.lcpoletto.tasks.model.Task;
 
 /**
@@ -22,8 +26,12 @@ import com.lcpoletto.tasks.model.Task;
 public class Utils {
 
     private static final Logger logger = Logger.getLogger(Utils.class);
-
     private static final String DEFAULT_EMAIL_FROM = "noreply@lcpoletto.com";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    static {
+        MAPPER.setDateFormat(new ISO8601DateFormat());
+    }
 
     /**
      * Avoids instantiation.
@@ -41,6 +49,25 @@ public class Utils {
         final String result = System.getenv().getOrDefault("TASKS_MAIL_FROM", DEFAULT_EMAIL_FROM);
         logger.trace(String.format("TASKS_MAIL_FROM: %s", result));
         return result;
+    }
+
+    /**
+     * Helper method wich will serialize an object to Json using a custom
+     * configured object mapper. This method was created to overcome the api
+     * gateway limitation on how to send java dates as ISO 8601 strings back.
+     * 
+     * @param value
+     *            object to be serialized
+     * @return json representation
+     */
+    public static String toJson(Object value) {
+        logger.trace(String.format("Serializing with custom mapper: %s", value));
+        try {
+            return MAPPER.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            logger.error("Error serializing value: ", e);
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**

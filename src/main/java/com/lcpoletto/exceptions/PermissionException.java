@@ -1,19 +1,17 @@
-/**
- * 
- */
 package com.lcpoletto.exceptions;
 
 import static java.lang.String.format;
 
 /**
- * Exception class to represent a validation failure.
+ * Exception class that will be thrown when there is a permission issue with the
+ * action being executed.
  * 
  * @author Luis Carlos Poletto
  *
  */
-public class ValidationException extends RuntimeException {
+public class PermissionException extends RuntimeException {
 
-    private static final long serialVersionUID = -641540785468580102L;
+    private static final long serialVersionUID = -4915930921128038387L;
 
     /**
      * Main constructor which uses {@link String#format(String, Object...)} to
@@ -30,12 +28,15 @@ public class ValidationException extends RuntimeException {
      * <strong>errorMessage property</strong> in the Lambda response"
      * </code>
      * 
+     * TODO: Configure this as a 403 on API gateway
+     * 
      * @param format
      *            string format
      * @param args
      *            formar arguments
      */
-    public ValidationException(String format, Object... args) {
-        super(format("[%s]: %s", ValidationException.class.getSimpleName(), format(format, args)));
+    public PermissionException(String format, Object... args) {
+        super(format("[%s]: %s", PermissionException.class.getSimpleName(), format(format, args)));
     }
+
 }

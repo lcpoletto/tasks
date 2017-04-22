@@ -5,6 +5,8 @@ import org.apache.log4j.Logger;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.lcpoletto.exceptions.ValidationException;
 import com.lcpoletto.notes.model.Note;
 
@@ -14,7 +16,7 @@ import com.lcpoletto.notes.model.Note;
  * @author Luis Carlos Poletto
  *
  */
-public class CreateNote {
+public class CreateNote implements RequestHandler<Note, Note> {
 
     private static final Logger logger = Logger.getLogger(CreateNote.class);
 
@@ -45,14 +47,17 @@ public class CreateNote {
      * 
      * @param input
      *            record to be inserted
+     * @param context
+     *            aws lambda context
      * @return the inserted record with generated id
      * @throws ValidationException
      *             if any input validation error happens
      */
-    public Note handleRequest(final Note input) throws ValidationException {
-        validateInput(input);
+    public Note handleRequest(final Note input, final Context context) {
         logger.debug(String.format("Inserting %s into persistence layer.", input));
+        validateInput(input);
         dynamoMapper.save(input);
+        input.setResourceUri(String.format("%s/%s", input.getResourceUri(), input.getId()));
         logger.debug(String.format("Inserted with success: %s", input));
         return input;
     }
@@ -65,7 +70,7 @@ public class CreateNote {
      * @throws ValidationException
      *             if any required field is missing
      */
-    public void validateInput(final Note input) throws ValidationException {
+    public void validateInput(final Note input) {
         logger.debug(String.format("Validating for insert: %s", input));
         if (input == null) {
             throw new ValidationException("Note to be created is required.");

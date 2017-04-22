@@ -35,8 +35,6 @@ public class Task implements Serializable, Comparable<Task> {
     private String user;
     private String description;
     private Integer priority;
-    // TODO: Need to figure out how to send this back to the user as UTC date
-    // instead of milliseconds
     private Date completed;
 
     /**

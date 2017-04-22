@@ -52,7 +52,7 @@ public class CreateTask {
      * @throws ValidationException
      *             if any validation error happens
      */
-    public Task handleRequest(final Task input) throws ValidationException {
+    public Task handleRequest(final Task input) {
         logger.debug(String.format("Adding task: %s", input));
         validateInput(input);
         dynamoMapper.save(input);
@@ -62,10 +62,10 @@ public class CreateTask {
     }
 
     // TODO: change all of this to use bean validation???
-    private void validateInput(final Task input) throws ValidationException {
+    private void validateInput(final Task input) {
         logger.debug(String.format("Validating for create: %s", input));
         if (input == null) {
-            throw new ValidationException("Input can't be null.");
+            throw new ValidationException("Task can't be null.");
         }
         if (input.getDescription() == null || input.getDescription().isEmpty()) {
             throw new ValidationException("Task description is required.");

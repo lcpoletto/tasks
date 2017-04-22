@@ -17,6 +17,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemResult;
+import com.lcpoletto.exceptions.PermissionException;
 import com.lcpoletto.exceptions.ValidationException;
 import com.lcpoletto.notes.model.Note;
 
@@ -40,54 +41,54 @@ public class UpdateNoteTest {
     }
 
     @Test(expected = ValidationException.class)
-    public void testNull() throws ValidationException {
-        lambda.handleRequest(null);
+    public void testNull() {
+        lambda.handleRequest(null, null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testEmpty() throws ValidationException {
-        lambda.handleRequest(new Note());
+    public void testEmpty() {
+        lambda.handleRequest(new Note(), null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testWithoutId() throws ValidationException {
+    public void testWithoutId() {
         final Note input = new Note();
         input.setContent("content");
         input.setUpdatedBy("updatedBy");
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testWithoutUpdatedBy() throws ValidationException {
+    public void testWithoutUpdatedBy() {
         final Note input = new Note();
         input.setId("id");
         input.setContent("content");
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
     }
 
     @Test(expected = ValidationException.class)
-    public void testWithoutContent() throws ValidationException {
+    public void testWithoutContent() {
         final Note input = new Note();
         input.setId("id");
         input.setOwner("owner");
         input.setUpdatedBy("updatedBy");
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
     }
 
-    @Test(expected = ValidationException.class)
-    public void testChangeNotAllowed() throws ValidationException {
+    @Test(expected = PermissionException.class)
+    public void testChangeNotAllowed() {
         final Note input = new Note();
         input.setId("id");
         input.setContent("content");
         input.setUpdatedBy("updatedBy");
 
         when(mockClient.getItem(any())).thenReturn(getChangeNotAllowed());
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
         verify(mockClient).getItem(any());
     }
 
     @Test
-    public void testChangeByOwner() throws ValidationException {
+    public void testChangeByOwner() {
         final Note input = new Note();
         input.setId("id");
         input.setContent("content");
@@ -95,13 +96,13 @@ public class UpdateNoteTest {
 
         when(mockClient.getItem(any())).thenReturn(getChangeNotAllowed());
         when(mockClient.updateItem(any())).thenReturn(new UpdateItemResult());
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
         verify(mockClient).getItem(any());
         verify(mockClient).updateItem(any());
     }
 
     @Test
-    public void testChangeAllowed() throws ValidationException {
+    public void testChangeAllowed() {
         final Note input = new Note();
         input.setId("id");
         input.setContent("content");
@@ -109,7 +110,7 @@ public class UpdateNoteTest {
 
         when(mockClient.getItem(any())).thenReturn(getChangeAllowed());
         when(mockClient.updateItem(any())).thenReturn(new UpdateItemResult());
-        lambda.handleRequest(input);
+        lambda.handleRequest(input, null);
         verify(mockClient).getItem(any());
         verify(mockClient).updateItem(any());
     }

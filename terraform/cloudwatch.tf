@@ -7,4 +7,7 @@ resource "aws_cloudwatch_event_rule" "send_tasks_daily_cw_rule" {
 resource "aws_cloudwatch_event_target" "send_tasks_daily_cw_target" {
 	rule = "${aws_cloudwatch_event_rule.send_tasks_daily_cw_rule.name}"
 	arn = "${aws_lambda_function.send_task_lambda.arn}"
+	input = <<EOF
+""
+EOF
 }

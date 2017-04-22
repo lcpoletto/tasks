@@ -44,27 +44,27 @@ public class SendNoteUpdateTest {
 
     @Test
     public void testNullOrEmpty() {
-        lambda.handleRequest(null);
-        lambda.handleRequest(Collections.emptyList());
+        lambda.handleRequest(null, null);
+        lambda.handleRequest(Collections.emptyList(), null);
         verify(emailClient, never()).sendEmail(any());
     }
 
     @Test
     public void testWrongEvents() {
-        lambda.handleRequest(populateWrongRecord());
+        lambda.handleRequest(populateWrongRecord(), null);
         verify(emailClient, never()).sendEmail(any());
     }
 
     @Test
     public void testUpdatedByOwner() {
-        lambda.handleRequest(populateRecord("owner"));
+        lambda.handleRequest(populateRecord("owner"), null);
         verify(emailClient, never()).sendEmail(any());
     }
 
     @Test
     public void testUpdatedByUser() {
         Mockito.when(emailClient.sendEmail(any())).thenReturn(null);
-        lambda.handleRequest(populateRecord("user"));
+        lambda.handleRequest(populateRecord("user"), null);
         verify(emailClient).sendEmail(any());
     }
 

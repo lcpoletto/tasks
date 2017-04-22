@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,6 +23,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lcpoletto.tasks.model.Task;
 
 /**
@@ -31,6 +35,8 @@ import com.lcpoletto.tasks.model.Task;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class RetrieveTaskTest {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Mock
     private AmazonDynamoDB mockClient;
@@ -45,7 +51,7 @@ public class RetrieveTaskTest {
     @Test
     public void testEmptyResults() {
         when(mockClient.scan(any())).thenReturn(new ScanResult());
-        final List<Task> result = lambda.handleRequest(null);
+        final List<Task> result = fromJson(lambda.handleRequest(null, null));
         assertNotNull(result);
         assertEquals(0, result.size());
         verify(mockClient).scan(any());
@@ -54,7 +60,7 @@ public class RetrieveTaskTest {
     @Test
     public void testNonEmptyResults() {
         when(mockClient.scan(any())).thenReturn(getUnorderedResults());
-        final List<Task> result = lambda.handleRequest(null);
+        final List<Task> result = fromJson(lambda.handleRequest(null, null));
         assertNotNull(result);
         assertEquals(5, result.size());
         verify(mockClient).scan(any());
@@ -63,7 +69,7 @@ public class RetrieveTaskTest {
     @Test
     public void testSortedResults() {
         when(mockClient.scan(any())).thenReturn(getUnorderedResults());
-        final List<Task> result = lambda.handleRequest(null);
+        final List<Task> result = fromJson(lambda.handleRequest(null, null));
         assertNotNull(result);
         assertEquals(5, result.size());
 
@@ -113,6 +119,15 @@ public class RetrieveTaskTest {
 
         result.setItems(items);
         return result;
+    }
+
+    private List<Task> fromJson(final String json) {
+        try {
+            return MAPPER.readValue(json, new TypeReference<List<Task>>() {
+            });
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
 }
