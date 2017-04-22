@@ -8,6 +8,7 @@ resource "aws_lambda_function" "create_task_lambda" {
 	
 	s3_bucket = "${aws_s3_bucket.deploy_bucket.bucket}"
 	s3_key = "${var.package_name}"
+	depends_on = ["aws_s3_bucket_object.lambda_package"]
 }
 
 resource "aws_lambda_permission" "create_task_api_permission" {
@@ -29,6 +30,7 @@ resource "aws_lambda_function" "delete_task_lambda" {
 	
 	s3_bucket = "${aws_s3_bucket.deploy_bucket.bucket}"
 	s3_key = "${var.package_name}"
+	depends_on = ["aws_s3_bucket_object.lambda_package"]
 }
 
 resource "aws_lambda_permission" "delete_task_api_permission" {
@@ -50,6 +52,7 @@ resource "aws_lambda_function" "retrieve_task_lambda" {
 	
 	s3_bucket = "${aws_s3_bucket.deploy_bucket.bucket}"
 	s3_key = "${var.package_name}"
+	depends_on = ["aws_s3_bucket_object.lambda_package"]
 }
 
 resource "aws_lambda_permission" "retrieve_task_api_permission" {
@@ -72,6 +75,7 @@ resource "aws_lambda_function" "send_task_lambda" {
 	
 	s3_bucket = "${aws_s3_bucket.deploy_bucket.bucket}"
 	s3_key = "${var.package_name}"
+	depends_on = ["aws_s3_bucket_object.lambda_package"]
 }
 
 resource "aws_lambda_function" "update_task_lambda" {
@@ -84,6 +88,7 @@ resource "aws_lambda_function" "update_task_lambda" {
 	
 	s3_bucket = "${aws_s3_bucket.deploy_bucket.bucket}"
 	s3_key = "${var.package_name}"
+	depends_on = ["aws_s3_bucket_object.lambda_package"]
 }
 
 resource "aws_lambda_permission" "update_task_api_permission" {

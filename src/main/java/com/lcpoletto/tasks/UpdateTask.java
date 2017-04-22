@@ -76,8 +76,8 @@ public class UpdateTask {
         if (input.getDescription() == null || input.getDescription().isEmpty()) {
             throw new ValidationException("Task description is required.");
         }
-        if (input.getPriority() == null || input.getPriority() < 0 || input.getPriority() > 10) {
-            throw new ValidationException("Task priority is required and must be between 0 and 10.");
+        if (input.getPriority() == null || input.getPriority() < 0 || input.getPriority() > 9) {
+            throw new ValidationException("Task priority is required and must be between 0 and 9.");
         }
         if (input.getId() == null || input.getId().isEmpty()) {
             throw new ValidationException("Task id is required.");

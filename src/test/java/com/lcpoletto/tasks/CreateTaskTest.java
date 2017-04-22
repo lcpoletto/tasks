@@ -60,7 +60,7 @@ public class CreateTaskTest {
     public void testUpperBoundPriority() throws ValidationException {
         final Task input = new Task();
         input.setDescription("Test description.");
-        input.setPriority(11);
+        input.setPriority(10);
         lambda.handleRequest(input);
     }
 

@@ -56,6 +56,7 @@ public class CreateTask {
         logger.debug(String.format("Adding task: %s", input));
         validateInput(input);
         dynamoMapper.save(input);
+        input.setResourceUri(String.format("%s/%s", input.getResourceUri(), input.getId()));
         logger.debug(String.format("Inserted with success: %s", input));
         return input;
     }
@@ -69,8 +70,8 @@ public class CreateTask {
         if (input.getDescription() == null || input.getDescription().isEmpty()) {
             throw new ValidationException("Task description is required.");
         }
-        if (input.getPriority() == null || input.getPriority() < 0 || input.getPriority() > 10) {
-            throw new ValidationException("Task priority is required and must be between 0 and 10.");
+        if (input.getPriority() == null || input.getPriority() < 0 || input.getPriority() > 9) {
+            throw new ValidationException("Task priority is required and must be between 0 and 9.");
         }
     }
 }
