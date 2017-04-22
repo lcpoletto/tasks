@@ -4,6 +4,10 @@ resource "aws_api_gateway_method" "notes_put_method" {
     resource_id = "${aws_api_gateway_resource.note_detail_resource.id}"
     http_method = "PUT"
     authorization = "NONE"
+    
+    request_models {
+        "application/json" = "${aws_api_gateway_model.note_model.name}"
+    }
 }
 
 resource "aws_api_gateway_integration" "notes_put_integration" {

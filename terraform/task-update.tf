@@ -4,6 +4,10 @@ resource "aws_api_gateway_method" "tasks_put_method" {
     resource_id = "${aws_api_gateway_resource.task_detail_resource.id}"
     http_method = "PUT"
     authorization = "NONE"
+    
+    request_models {
+        "application/json" = "${aws_api_gateway_model.task_model.name}"
+    }
 }
 
 resource "aws_api_gateway_integration" "tasks_put_integration" {

@@ -1,13 +1,102 @@
 ---
 swagger: "2.0"
 info:
-  version: "2017-04-22T19:59:42Z"
+  version: "2017-04-22T22:11:48Z"
   title: "tasks"
-host: "jmfr1rlzw5.execute-api.us-east-1.amazonaws.com"
+host: "56we41fu3e.execute-api.us-east-1.amazonaws.com"
 basePath: "/development"
 schemes:
 - "https"
 paths:
+  /notes:
+    post:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "note"
+        required: true
+        schema:
+          $ref: "#/definitions/note"
+      responses:
+        201:
+          description: "201 response"
+          headers:
+            Location:
+              type: "string"
+        400:
+          description: "400 response"
+      x-amazon-apigateway-request-validator: "Validate body"
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "201"
+            responseParameters:
+              method.response.header.Location: "integration.response.body.resourceUri"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{ }\n"
+          .*ValidationException.*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
+        requestTemplates:
+          application/json: "{\n    \"resourceUri\": \"$context.resourcePath\",\n\
+            \    \"owner\": \"$input.path('$.owner')\",\n    \"recipient\": \"$input.path('$.recipient')\"\
+            ,\n    \"allowChange\": \"$input.path('$.allowChange')\",\n    \"content\"\
+            : \"$input.path('$.content')\",\n    \"updatedBy\": \"$input.path('$.updatedBy')\"\
+            \n}\n"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:178161805723:function:create_note/invocations"
+        passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
+        type: "aws"
+  /notes/{id}:
+    put:
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "200 response"
+        400:
+          description: "400 response"
+        403:
+          description: "403 response"
+        404:
+          description: "404 response"
+      x-amazon-apigateway-request-validator: "Validate body"
+      x-amazon-apigateway-integration:
+        responses:
+          .*ValidationException.*:
+            statusCode: "400"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
+          default:
+            statusCode: "200"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{ }\n"
+          .*PermissionException.*:
+            statusCode: "403"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
+          .*ObjectNotFoundException.*:
+            statusCode: "404"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
+        requestTemplates:
+          application/json: "## There is probably a way I can do this without hardcoding\n\
+            ## them, probably iterating on all properties\n{\n    \"id\": \"$input.params('id')\"\
+            ,\n    \"resourceUri\": \"$context.resourcePath\",\n    \"owner\": \"\
+            $input.path('$.owner')\",\n    \"recipient\": \"$input.path('$.recipient')\"\
+            ,\n    \"allowChange\": \"$input.path('$.allowChange')\",\n    \"content\"\
+            : \"$input.path('$.content')\",\n    \"updatedBy\": \"$input.path('$.updatedBy')\"\
+            \n}\n"
+        uri: "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:178161805723:function:update_note/invocations"
+        passthroughBehavior: "when_no_templates"
+        httpMethod: "POST"
+        type: "aws"
   /tasks:
     get:
       consumes:
@@ -17,6 +106,8 @@ paths:
       responses:
         200:
           description: "200 response"
+          schema:
+            $ref: "#/definitions/task"
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -52,6 +143,7 @@ paths:
               type: "string"
         400:
           description: "400 response"
+      x-amazon-apigateway-request-validator: "Validate body"
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -86,6 +178,7 @@ paths:
           description: "400 response"
         404:
           description: "404 response"
+      x-amazon-apigateway-request-validator: "Validate body"
       x-amazon-apigateway-integration:
         responses:
           default:
@@ -94,6 +187,10 @@ paths:
               application/json: "#set($inputRoot = $input.path('$'))\n{ }\n"
           .*ValidationException.*:
             statusCode: "400"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
+          .*ObjectNotFoundException.*:
+            statusCode: "404"
             responseTemplates:
               application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
         requestTemplates:
@@ -139,6 +236,41 @@ paths:
         httpMethod: "POST"
         type: "aws"
 definitions:
+  note:
+    type: "object"
+    required:
+    - "allowChange"
+    - "content"
+    - "owner"
+    - "recipient"
+    properties:
+      owner:
+        type: "string"
+        description: "Note owner's email address"
+        title: "Owner"
+        minLength: 5
+        maxLength: 254
+      recipient:
+        type: "string"
+        description: "Note recipent's email address"
+        title: "Recipient"
+        minLength: 5
+        maxLength: 254
+      allowChange:
+        type: "boolean"
+        description: "Allow recipent to update note"
+        title: "AllowChange"
+      content:
+        type: "string"
+        description: "Note content"
+        title: "Content"
+      updatedBy:
+        type: "string"
+        description: "Email address of user updating the note"
+        title: "UpdatedBy"
+        minLength: 5
+        maxLength: 254
+    title: "A note"
   task:
     type: "object"
     required:
@@ -167,3 +299,7 @@ definitions:
         description: "Completed datetime, formatted as an ISO8601 string"
         title: "Completed"
     title: "A task"
+x-amazon-apigateway-request-validators:
+  Validate body:
+    validateRequestParameters: false
+    validateRequestBody: true
