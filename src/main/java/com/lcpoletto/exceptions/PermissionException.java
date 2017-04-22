@@ -28,8 +28,6 @@ public class PermissionException extends RuntimeException {
      * <strong>errorMessage property</strong> in the Lambda response"
      * </code>
      * 
-     * TODO: Configure this as a 403 on API gateway
-     * 
      * @param format
      *            string format
      * @param args

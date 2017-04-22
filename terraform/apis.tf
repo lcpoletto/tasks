@@ -2,8 +2,6 @@
 # setting on gateway method, will need to go on the API and do this change
 # manually for a few methods
 
-# TODO: Return HTTP 400 "Invalid request body" when there is validation errors
-
 # All lambda permissions are in lambdas.tf file
 resource "aws_api_gateway_rest_api" "tasks_api" {
     name = "tasks"

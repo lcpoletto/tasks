@@ -1,5 +1,3 @@
-# TODO: Review the attachments here and remove hardcoded ARNs
-
 resource "aws_iam_role" "ro_tasks_role" {
 	name = "ro_tasks_role"
 	

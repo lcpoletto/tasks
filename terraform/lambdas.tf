@@ -64,7 +64,6 @@ resource "aws_lambda_permission" "retrieve_task_api_permission" {
     source_arn = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.tasks_api.id}/*/${aws_api_gateway_method.tasks_get_method.http_method}/tasks"
 }
 
-# TODO: check the permission for daily triggers
 resource "aws_lambda_function" "send_task_lambda" {
 	function_name = "send_task"
 	handler = "com.lcpoletto.tasks.SendTask::handleRequest"

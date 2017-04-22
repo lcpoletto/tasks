@@ -17,9 +17,6 @@ import com.lcpoletto.tasks.model.Task;
  * Class which holds helper and utility methods that might be used by multiple
  * others.
  * 
- * TODO: maybe there is a better way to do this with java 8? default methods on
- * interfaces?
- * 
  * @author Luis Carlos Poletto
  *
  */

@@ -17,9 +17,6 @@ import com.lcpoletto.exceptions.ValidationException;
  * 
  * @author Luis Carlos Poletto
  */
-// https://aws.amazon.com/blogs/compute/how-to-remove-boilerplate-validation-logic-in-your-rest-apis-with-amazon-api-gateway-request-validation/
-// TODO: maybe use autovalue?
-// https://github.com/google/auto/blob/master/value/userguide/index.md
 @DynamoDBTable(tableName = "tasks")
 public class Task implements Serializable, Comparable<Task> {
 
