@@ -10,7 +10,7 @@ $ ./gradle build
 
 The command above will run all the unit tests and packaging tasks and will generate an AWS Lambda package in this location: `./build/distributions/tasks-1.0-SNAPSHOT.zip`.
 
-### Deploying to AWS
+## Deploying to AWS
 After a succesfull build you can use terraform to deploy the generated package to AWS, in order to do that it's needed to configure a few variables to be passed to terraform. There are many ways to do that, below you can find one example:
 
 ```Shell
