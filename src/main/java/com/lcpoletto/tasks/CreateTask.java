@@ -8,6 +8,8 @@ import org.apache.log4j.Logger;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.lcpoletto.exceptions.ValidationException;
 import com.lcpoletto.tasks.model.Task;
 
@@ -17,7 +19,7 @@ import com.lcpoletto.tasks.model.Task;
  * @author Luis Carlos Poletto
  * 
  */
-public class CreateTask {
+public class CreateTask implements RequestHandler<Task, Task> {
 
     private static final Logger logger = Logger.getLogger(CreateTask.class);
 
@@ -48,11 +50,14 @@ public class CreateTask {
      * 
      * @param input
      *            task to be created
+     * @param context
+     *            aws lambda context
      * @return created task with the generated task id
      * @throws ValidationException
      *             if any validation error happens
      */
-    public Task handleRequest(final Task input) {
+    @Override
+    public Task handleRequest(final Task input, final Context context) {
         logger.debug(String.format("Adding task: %s", input));
         validateInput(input);
         dynamoMapper.save(input);

@@ -60,7 +60,7 @@ public class UpdateTask implements RequestHandler<Task, String> {
      *             if the object being updated is not on persistence layer
      */
     @Override
-    public String handleRequest(Task input, Context context) {
+    public String handleRequest(final Task input, final Context context) {
         logger.debug(String.format("Updating task: %s", input));
         validateInput(input);
         if (dynamoMapper.load(input) == null) {

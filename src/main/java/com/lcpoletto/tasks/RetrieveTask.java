@@ -57,7 +57,7 @@ public class RetrieveTask implements RequestHandler<String, String> {
      * @return json representation of the sorted array of tasks
      */
     @Override
-    public String handleRequest(String input, Context context) {
+    public String handleRequest(final String input, final Context context) {
         return Utils.toJson(handleRequest());
     }
 

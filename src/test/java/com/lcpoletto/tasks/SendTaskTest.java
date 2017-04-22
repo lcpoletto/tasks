@@ -49,7 +49,7 @@ public class SendTaskTest {
     @Test
     public void testEmptyResults() {
         when(mockDynamo.scan(any())).thenReturn(new ScanResult());
-        final String result = lambda.handleRequest(null);
+        final String result = lambda.handleRequest(null, null);
         assertNotNull(result);
         assertEquals("SUCCESS", result);
         verify(mockDynamo).scan(any());
@@ -59,7 +59,7 @@ public class SendTaskTest {
     public void testWithResults() {
         when(mockDynamo.scan(any())).thenReturn(getUnorderedResults());
         when(mockSimpleEmailService.sendEmail(any())).thenReturn(new SendEmailResult());
-        final String result = lambda.handleRequest(null);
+        final String result = lambda.handleRequest(null, null);
         assertNotNull(result);
         assertEquals("SUCCESS", result);
         verify(mockDynamo).scan(any());

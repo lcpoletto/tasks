@@ -33,7 +33,7 @@ public class CreateTaskTest {
 
     @Test(expected = ValidationException.class)
     public void testNull() {
-        lambda.handleRequest(null);
+        lambda.handleRequest(null, null);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class CreateTaskTest {
         input.setDescription("Test description");
         input.setPriority(5);
 
-        final Task result = lambda.handleRequest(input);
+        final Task result = lambda.handleRequest(input, null);
         assertNotNull(result.getId());
     }
 }

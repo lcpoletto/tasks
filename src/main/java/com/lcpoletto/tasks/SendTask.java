@@ -14,6 +14,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import com.amazonaws.services.simpleemail.model.Body;
@@ -32,7 +34,7 @@ import com.lcpoletto.tasks.model.Task;
  * 
  * @author Luis Carlos Poletto
  */
-public class SendTask {
+public class SendTask implements RequestHandler<String, String> {
 
     private static final Logger logger = Logger.getLogger(SendTask.class);
     private static final String SUCCESS = "SUCCESS";
@@ -69,9 +71,12 @@ public class SendTask {
      * 
      * @param input
      *            this input is ignored
+     * @param context
+     *            AWS lambda context
      * @return <code>SUCCESS</code> if no uncaught exception happens
      */
-    public String handleRequest(String input) {
+    @Override
+    public String handleRequest(final String input, final Context context) {
         logger.debug("Sending tasks reminder to users.");
         final List<Task> allTasks = retrieveUncompletedTasks();
 

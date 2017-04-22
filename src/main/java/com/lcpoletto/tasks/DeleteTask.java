@@ -58,7 +58,7 @@ public class DeleteTask implements RequestHandler<String, String> {
      *         <code>NOT_FOUND</code> if task didn't exist
      */
     @Override
-    public String handleRequest(String taskId, Context context) {
+    public String handleRequest(final String taskId, final Context context) {
         logger.debug(String.format("Deleting task %s", taskId));
         validateInput(taskId);
         final Task retrieved = dynamoMapper.load(Task.class, taskId);
