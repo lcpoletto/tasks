@@ -85,15 +85,7 @@ public class UpdateNote implements RequestHandler<Note, String> {
         if (input == null) {
             throw new ValidationException("Note to be updated is required.");
         }
-        if (input.getId() == null || input.getId().isEmpty()) {
-            throw new ValidationException("Note id is required.");
-        }
-        if (input.getUpdatedBy() == null || input.getUpdatedBy().isEmpty()) {
-            throw new ValidationException("User updating the note is required.");
-        }
-        if (input.getContent() == null || input.getContent().isEmpty()) {
-            throw new ValidationException("Note content is required.");
-        }
+        input.validate(true);
     }
 
     /**

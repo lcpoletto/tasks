@@ -32,40 +32,12 @@ public class CreateTaskTest {
     }
 
     @Test(expected = ValidationException.class)
-    public void testNull() throws ValidationException {
+    public void testNull() {
         lambda.handleRequest(null);
     }
 
-    @Test(expected = ValidationException.class)
-    public void testEmpty() throws ValidationException {
-        lambda.handleRequest(new Task());
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutPriority() throws ValidationException {
-        final Task input = new Task();
-        input.setDescription("Test description.");
-        lambda.handleRequest(input);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testLowerBoundPriority() throws ValidationException {
-        final Task input = new Task();
-        input.setDescription("Test description.");
-        input.setPriority(-1);
-        lambda.handleRequest(input);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testUpperBoundPriority() throws ValidationException {
-        final Task input = new Task();
-        input.setDescription("Test description.");
-        input.setPriority(10);
-        lambda.handleRequest(input);
-    }
-
     @Test
-    public void testValid() throws ValidationException {
+    public void testValid() {
         final Task input = new Task();
         input.setDescription("Test description");
         input.setPriority(5);

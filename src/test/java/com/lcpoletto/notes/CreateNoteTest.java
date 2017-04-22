@@ -40,45 +40,6 @@ public class CreateNoteTest {
         lambda.handleRequest(null, null);
     }
 
-    @Test(expected = ValidationException.class)
-    public void testEmpty() {
-        lambda.handleRequest(new Note(), null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithId() {
-        final Note input = populateNote();
-        lambda.handleRequest(input, null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutAllowChange() {
-        final Note input = populateNote();
-        input.setAllowChange(null);
-        lambda.handleRequest(input, null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutContent() {
-        final Note input = populateNote();
-        input.setContent(null);
-        lambda.handleRequest(input, null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutOwner() {
-        final Note input = populateNote();
-        input.setOwner(null);
-        lambda.handleRequest(input, null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutRecipient() {
-        final Note input = populateNote();
-        input.setRecipient(null);
-        lambda.handleRequest(input, null);
-    }
-
     @Test
     public void testSuccess() {
         when(mockClient.putItem(any())).thenReturn(new PutItemResult());

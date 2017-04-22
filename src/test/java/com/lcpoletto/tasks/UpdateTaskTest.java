@@ -40,40 +40,12 @@ public class UpdateTaskTest {
     }
 
     @Test(expected = ValidationException.class)
-    public void testNull() throws ValidationException {
+    public void testNull() {
         lambda.handleRequest(null, null);
     }
 
-    @Test(expected = ValidationException.class)
-    public void testEmpty() throws ValidationException {
-        lambda.handleRequest(new Task(), null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutPriority() throws ValidationException {
-        final Task input = new Task();
-        input.setDescription("Test description.");
-        lambda.handleRequest(input, null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testLowerBoundPriority() throws ValidationException {
-        final Task input = new Task();
-        input.setDescription("Test description.");
-        input.setPriority(-1);
-        lambda.handleRequest(input, null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testUpperBoundPriority() throws ValidationException {
-        final Task input = new Task();
-        input.setDescription("Test description.");
-        input.setPriority(10);
-        lambda.handleRequest(input, null);
-    }
-
     @Test(expected = ObjectNotFoundException.class)
-    public void testNotFound() throws ValidationException {
+    public void testNotFound() {
         final Task input = new Task();
         input.setDescription("Test description");
         input.setPriority(5);
@@ -90,7 +62,7 @@ public class UpdateTaskTest {
     }
 
     @Test
-    public void testValid() throws ValidationException {
+    public void testValid() {
         final String taskId = "success-id";
         final Task input = new Task();
         input.setDescription("Test description");

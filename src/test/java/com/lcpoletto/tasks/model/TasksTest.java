@@ -3,15 +3,18 @@
  */
 package com.lcpoletto.tasks.model;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.util.Arrays;
 import java.util.Date;
 
 import org.joda.time.LocalDate;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.lcpoletto.Utils;
+import com.lcpoletto.exceptions.ValidationException;
 
 /**
  * Test fixture for {@link Task}.
@@ -40,9 +43,73 @@ public class TasksTest {
         assertOrdered();
     }
 
+    @Test(expected = ValidationException.class)
+    public void testEmpty() {
+        new Task().validate(true);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testWithoutPriority() {
+        final Task task = new Task();
+        task.setDescription("Test description.");
+        task.validate(true);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testLowerBoundPriority() {
+        final Task task = new Task();
+        task.setDescription("Test description.");
+        task.setPriority(-1);
+        task.validate(true);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testUpperBoundPriority() {
+        final Task task = new Task();
+        task.setDescription("Test description.");
+        task.setPriority(10);
+        task.validate(true);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testUpdateWithoutId() {
+        final Task task = new Task();
+        task.setDescription("Test description.");
+        task.setPriority(8);
+        task.validate(true);
+    }
+
+    @Test
+    public void testValidInsert() {
+        final Task task = new Task();
+        task.setDescription("Test description.");
+        task.setPriority(8);
+        try {
+            task.validate(false);
+        } catch (ValidationException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void testValidUpdate() {
+        final Task task = new Task();
+        task.setDescription("Test description.");
+        task.setPriority(8);
+        task.setId("id");
+        try {
+            task.validate(false);
+        } catch (ValidationException e) {
+            fail();
+        }
+    }
+
+    /**
+     * Helper function to assert all items are ordered.
+     */
     private void assertOrdered() {
         for (int i = 0; i < tasks.length; i++) {
-            Assert.assertEquals("" + i, tasks[i].getId());
+            assertEquals("" + i, tasks[i].getId());
         }
     }
 

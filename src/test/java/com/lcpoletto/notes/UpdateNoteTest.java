@@ -3,6 +3,7 @@
  */
 package com.lcpoletto.notes;
 
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,36 +46,6 @@ public class UpdateNoteTest {
         lambda.handleRequest(null, null);
     }
 
-    @Test(expected = ValidationException.class)
-    public void testEmpty() {
-        lambda.handleRequest(new Note(), null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutId() {
-        final Note input = new Note();
-        input.setContent("content");
-        input.setUpdatedBy("updatedBy");
-        lambda.handleRequest(input, null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutUpdatedBy() {
-        final Note input = new Note();
-        input.setId("id");
-        input.setContent("content");
-        lambda.handleRequest(input, null);
-    }
-
-    @Test(expected = ValidationException.class)
-    public void testWithoutContent() {
-        final Note input = new Note();
-        input.setId("id");
-        input.setOwner("owner");
-        input.setUpdatedBy("updatedBy");
-        lambda.handleRequest(input, null);
-    }
-
     @Test(expected = PermissionException.class)
     public void testChangeNotAllowed() {
         final Note input = new Note();
@@ -83,8 +54,30 @@ public class UpdateNoteTest {
         input.setUpdatedBy("updatedBy");
 
         when(mockClient.getItem(any())).thenReturn(getChangeNotAllowed());
-        lambda.handleRequest(input, null);
-        verify(mockClient).getItem(any());
+        try {
+            lambda.handleRequest(input, null);
+            fail();
+        } catch (Throwable t) {
+            verify(mockClient).getItem(any());
+            throw t;
+        }
+    }
+
+    @Test(expected = PermissionException.class)
+    public void testChangeAllowedWrongUser() {
+        final Note input = new Note();
+        input.setId("id");
+        input.setContent("content");
+        input.setUpdatedBy("updatedBy");
+
+        when(mockClient.getItem(any())).thenReturn(getChangeAllowed("otherUser"));
+        try {
+            lambda.handleRequest(input, null);
+            fail();
+        } catch (Throwable t) {
+            verify(mockClient).getItem(any());
+            throw t;
+        }
     }
 
     @Test
@@ -102,13 +95,13 @@ public class UpdateNoteTest {
     }
 
     @Test
-    public void testChangeAllowed() {
+    public void testOtherChangeAllowed() {
         final Note input = new Note();
         input.setId("id");
         input.setContent("content");
         input.setUpdatedBy("updatedBy");
 
-        when(mockClient.getItem(any())).thenReturn(getChangeAllowed());
+        when(mockClient.getItem(any())).thenReturn(getChangeAllowed("updatedBy"));
         when(mockClient.updateItem(any())).thenReturn(new UpdateItemResult());
         lambda.handleRequest(input, null);
         verify(mockClient).getItem(any());
@@ -135,12 +128,12 @@ public class UpdateNoteTest {
      * 
      * @return note that can be changed
      */
-    private GetItemResult getChangeAllowed() {
+    private GetItemResult getChangeAllowed(final String user) {
         final GetItemResult result = new GetItemResult();
         result.addItemEntry("id", new AttributeValue("id"));
         result.addItemEntry("allowChange", new AttributeValue().withN("1"));
         result.addItemEntry("owner", new AttributeValue("owner"));
-        result.addItemEntry("recipient", new AttributeValue("updatedBy"));
+        result.addItemEntry("recipient", new AttributeValue(user));
         return result;
     }
 }

@@ -75,20 +75,6 @@ public class CreateNote implements RequestHandler<Note, Note> {
         if (input == null) {
             throw new ValidationException("Note to be created is required.");
         }
-        if (input.getId() != null && !input.getId().isEmpty()) {
-            throw new ValidationException("Note to be created can't have an id set.");
-        }
-        if (input.getAllowChange() == null) {
-            throw new ValidationException("Note allowChange is required.");
-        }
-        if (input.getContent() == null || input.getContent().isEmpty()) {
-            throw new ValidationException("Note content is required.");
-        }
-        if (input.getOwner() == null || input.getOwner().isEmpty()) {
-            throw new ValidationException("Note owner is required.");
-        }
-        if (input.getRecipient() == null || input.getRecipient().isEmpty()) {
-            throw new ValidationException("Note recipient is required.");
-        }
+        input.validate(false);
     }
 }

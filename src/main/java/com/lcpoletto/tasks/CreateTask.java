@@ -61,17 +61,11 @@ public class CreateTask {
         return input;
     }
 
-    // TODO: change all of this to use bean validation???
     private void validateInput(final Task input) {
         logger.debug(String.format("Validating for create: %s", input));
         if (input == null) {
             throw new ValidationException("Task can't be null.");
         }
-        if (input.getDescription() == null || input.getDescription().isEmpty()) {
-            throw new ValidationException("Task description is required.");
-        }
-        if (input.getPriority() == null || input.getPriority() < 0 || input.getPriority() > 9) {
-            throw new ValidationException("Task priority is required and must be between 0 and 9.");
-        }
+        input.validate(false);
     }
 }
