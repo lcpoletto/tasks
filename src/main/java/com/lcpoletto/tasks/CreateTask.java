@@ -21,38 +21,56 @@ public class CreateTask {
 
     private static final Logger logger = Logger.getLogger(CreateTask.class);
 
+    private DynamoDBMapper dynamoMapper;
+
+    /**
+     * Default constructor which will use AWS static helpers to instantiate
+     * class properties.
+     */
+    public CreateTask() {
+        this(AmazonDynamoDBClientBuilder.defaultClient());
+    }
+
+    /**
+     * Overloaded constructor which received the AWS dynamo db client. This
+     * constructor was created mainly to make it easier to mock external
+     * dependencies on unit tests.
+     * 
+     * @param dynamoClient
+     *            dynamo db client to be used
+     */
+    public CreateTask(final AmazonDynamoDB dynamoClient) {
+        dynamoMapper = new DynamoDBMapper(dynamoClient);
+    }
+
+    /**
+     * Lambda entry point which will create a new task in dynamo DB.
+     * 
+     * @param input
+     *            task to be created
+     * @return created task with the generated task id
+     * @throws ValidationException
+     *             if any validation error happens
+     */
     public Task handleRequest(final Task input) throws ValidationException {
-        validateInput(input);
         logger.debug(String.format("Adding task: %s", input));
-        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
-        final DynamoDBMapper mapper = new DynamoDBMapper(client);
-        mapper.save(input);
+        validateInput(input);
+        dynamoMapper.save(input);
         logger.debug(String.format("Inserted with success: %s", input));
         return input;
     }
 
     // TODO: change all of this to use bean validation???
     private void validateInput(final Task input) throws ValidationException {
-        final StringBuilder errors = new StringBuilder();
+        logger.debug(String.format("Validating for create: %s", input));
         if (input == null) {
-            addError(errors, "Input can't be null.");
-        } else {
-            if (input.getDescription() == null || input.getDescription().isEmpty()) {
-                addError(errors, "Task description is required.");
-            }
-            if (input.getPriority() == null || input.getPriority() < 0 || input.getPriority() > 10) {
-                addError(errors, "Task priority is required and must be between 0 and 10.");
-            }
+            throw new ValidationException("Input can't be null.");
         }
-        if (errors.length() > 0) {
-            throw new ValidationException(errors.toString());
+        if (input.getDescription() == null || input.getDescription().isEmpty()) {
+            throw new ValidationException("Task description is required.");
         }
-    }
-
-    private void addError(final StringBuilder errors, final String message) {
-        if (errors.length() > 0) {
-            errors.append("\n");
+        if (input.getPriority() == null || input.getPriority() < 0 || input.getPriority() > 10) {
+            throw new ValidationException("Task priority is required and must be between 0 and 10.");
         }
-        errors.append(message);
     }
 }

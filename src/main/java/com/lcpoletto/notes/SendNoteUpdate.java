@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.amazonaws.services.dynamodbv2.model.OperationType;
 import com.amazonaws.services.dynamodbv2.model.Record;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
@@ -69,7 +70,8 @@ public class SendNoteUpdate {
                 // even though the configuration we're going to do on the lambda
                 // trigger is to only call this when there is an update, it
                 // doesn't hurt to make sure we're responding to a modify event
-                if ("MODIFY".equals(record.getEventName())) {
+                final OperationType operation = OperationType.fromValue(record.getEventName());
+                if (operation == OperationType.MODIFY) {
                     final String updatedBy = record.getDynamodb().getNewImage().get("updatedBy").getS();
                     final String owner = record.getDynamodb().getNewImage().get("owner").getS();
                     final String content = record.getDynamodb().getNewImage().get("content").getS();

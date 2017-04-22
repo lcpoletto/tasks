@@ -50,10 +50,40 @@ public class CreateNote {
      *             if any input validation error happens
      */
     public Note handleRequest(final Note input) throws ValidationException {
-        // TODO: Add input validation
+        validateInput(input);
         logger.debug(String.format("Inserting %s into persistence layer.", input));
         dynamoMapper.save(input);
         logger.debug(String.format("Inserted with success: %s", input));
         return input;
+    }
+
+    /**
+     * Validates if all the required fields are present on the received note.
+     * 
+     * @param input
+     *            note to be validate
+     * @throws ValidationException
+     *             if any required field is missing
+     */
+    public void validateInput(final Note input) throws ValidationException {
+        logger.debug(String.format("Validating for insert: %s", input));
+        if (input == null) {
+            throw new ValidationException("Note to be created is required.");
+        }
+        if (input.getId() != null && !input.getId().isEmpty()) {
+            throw new ValidationException("Note to be created can't have an id set.");
+        }
+        if (input.getAllowChange() == null) {
+            throw new ValidationException("Note allowChange is required.");
+        }
+        if (input.getContent() == null || input.getContent().isEmpty()) {
+            throw new ValidationException("Note content is required.");
+        }
+        if (input.getOwner() == null || input.getOwner().isEmpty()) {
+            throw new ValidationException("Note owner is required.");
+        }
+        if (input.getRecipient() == null || input.getRecipient().isEmpty()) {
+            throw new ValidationException("Note recipient is required.");
+        }
     }
 }

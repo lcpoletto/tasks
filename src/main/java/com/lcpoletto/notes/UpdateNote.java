@@ -66,6 +66,14 @@ public class UpdateNote {
         return input;
     }
 
+    /**
+     * Validate all the required fields on the input.
+     * 
+     * @param input
+     *            note to be validated
+     * @throws ValidationException
+     *             if any required field is missing
+     */
     private void validateInput(final Note input) throws ValidationException {
         logger.debug(String.format("Validating for update: %s", input));
         if (input == null) {
@@ -82,6 +90,17 @@ public class UpdateNote {
         }
     }
 
+    /**
+     * Retrieves the correspondig note from the database and validate if the
+     * user making the change is allowed to do so.
+     * 
+     * @param input
+     *            note to be validated
+     * @return the retrieved note from the database
+     * @throws ValidationException
+     *             if the user is not the owner of the note and the note is not
+     *             marked to allow changes
+     */
     private Note validateAllowChange(final Note input) throws ValidationException {
         logger.debug(String.format("Checking change allowed: %s", input));
         final Note retrieved = dynamoMapper.load(input);

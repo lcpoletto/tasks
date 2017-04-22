@@ -92,5 +92,5 @@ resource "aws_lambda_permission" "update_task_api_permission" {
     function_name = "${aws_lambda_function.update_task_lambda.arn}"
     principal = "apigateway.amazonaws.com"
     # as terraform does not expose method arns we need to reconstruct them manually
-    source_arn = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.tasks_api.id}/*/${aws_api_gateway_method.tasks_update_method.http_method}/tasks/*"
+    source_arn = "arn:aws:execute-api:${var.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.tasks_api.id}/*/${aws_api_gateway_method.tasks_put_method.http_method}/tasks/*"
 }

@@ -1,13 +1,10 @@
 package com.lcpoletto.tasks;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.powermock.api.easymock.PowerMock.mockStatic;
-import static org.powermock.api.easymock.PowerMock.replayAll;
-import static org.powermock.api.easymock.PowerMock.verifyAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -17,17 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.easymock.EasyMock;
-import org.easymock.Mock;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.fasterxml.jackson.databind.util.ISO8601DateFormat;
@@ -39,8 +32,7 @@ import com.lcpoletto.tasks.model.Task;
  * @author Luis.Poletto
  *
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ AmazonDynamoDBClientBuilder.class })
+@RunWith(MockitoJUnitRunner.class)
 public class RetrieveTaskTest {
 
     private static final DateFormat ISO8601FORMAT = new ISO8601DateFormat();
@@ -48,49 +40,29 @@ public class RetrieveTaskTest {
     @Mock
     private AmazonDynamoDB mockClient;
 
-    /**
-     * Every test we do here we are calling these mocked methods at least once,
-     * thus make sense to have it on the setup method.
-     */
+    private RetrieveTask lambda;
+
     @Before
     public void setup() {
-        mockStatic(AmazonDynamoDBClientBuilder.class);
-        expect(AmazonDynamoDBClientBuilder.defaultClient()).andReturn(mockClient);
-    }
-
-    /**
-     * We have to verify at least one call on
-     * {@link AmazonDynamoDBClientBuilder}.
-     */
-    @After
-    public void tearDown() {
-        verifyAll();
+        lambda = new RetrieveTask(mockClient);
     }
 
     @Test
     public void testEmptyResults() {
-        expect(mockClient.scan(EasyMock.anyObject())).andReturn(new ScanResult());
-        replay(mockClient);
-        replayAll();
-
-        final RetrieveTask lambda = new RetrieveTask();
+        when(mockClient.scan(any())).thenReturn(new ScanResult());
         final List<Task> result = lambda.handleRequest(null);
         assertNotNull(result);
         assertEquals(0, result.size());
-        verify(mockClient);
+        verify(mockClient).scan(any());
     }
 
     @Test
     public void testNonEmptyResults() {
-        expect(mockClient.scan(EasyMock.anyObject())).andReturn(getUnorderedResults());
-        replay(mockClient);
-        replayAll();
-
-        final RetrieveTask lambda = new RetrieveTask();
+        when(mockClient.scan(any())).thenReturn(getUnorderedResults());
         final List<Task> result = lambda.handleRequest(null);
         assertNotNull(result);
         assertEquals(3, result.size());
-        verify(mockClient);
+        verify(mockClient).scan(any());
     }
 
     /**
@@ -98,20 +70,21 @@ public class RetrieveTaskTest {
      */
     @Test
     public void testSortedResults() {
-        expect(mockClient.scan(EasyMock.anyObject())).andReturn(getUnorderedResults());
-        replay(mockClient);
-        replayAll();
-
-        final RetrieveTask lambda = new RetrieveTask();
+        when(mockClient.scan(any())).thenReturn(getUnorderedResults());
         final List<Task> result = lambda.handleRequest(null);
         assertNotNull(result);
         assertEquals(3, result.size());
         assertEquals("first", result.get(0).getId());
         assertEquals("second", result.get(1).getId());
         assertEquals("third", result.get(2).getId());
-        verify(mockClient);
+        verify(mockClient).scan(any());
     }
 
+    /**
+     * Helper method which will produce test data.
+     * 
+     * @return testable data
+     */
     private ScanResult getUnorderedResults() {
         final ScanResult result = new ScanResult();
         final Collection<Map<String, AttributeValue>> items = new ArrayList<>();

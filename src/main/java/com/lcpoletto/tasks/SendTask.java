@@ -37,12 +37,45 @@ public class SendTask {
     private static final Logger logger = Logger.getLogger(SendTask.class);
     private static final String SUCCESS = "SUCCESS";
 
+    private DynamoDBMapper dynamoMapper;
+    private AmazonSimpleEmailService emailClient;
+
+    /**
+     * Default constructor which will use AWS static helpers to instantiate
+     * class properties.
+     */
+    public SendTask() {
+        this(AmazonDynamoDBClientBuilder.defaultClient(), AmazonSimpleEmailServiceClientBuilder.defaultClient());
+    }
+
+    /**
+     * Overloaded constructor which received the AWS dynamo db client and the
+     * AWS SES client. This constructor was created mainly to make it easier to
+     * mock external dependencies on unit tests.
+     * 
+     * @param dynamoClient
+     *            dynamo db client to be used
+     * @param emailClient
+     *            SES client to be used
+     */
+    public SendTask(final AmazonDynamoDB dynamoClient, final AmazonSimpleEmailService emailClient) {
+        dynamoMapper = new DynamoDBMapper(dynamoClient);
+        this.emailClient = emailClient;
+    }
+
+    /**
+     * AWS Lambda entry point which will search for uncompleted tasks and send
+     * reminder e-mails to their owners.
+     * 
+     * @param input
+     *            this input is ignored
+     * @return <code>SUCCESS</code> if no uncaught exception happens
+     */
     public String handleRequest(String input) {
         logger.debug("Sending tasks reminder to users.");
         final List<Task> allTasks = retrieveUncompletedTasks();
 
         if (allTasks != null && !allTasks.isEmpty()) {
-            AmazonSimpleEmailService emailClient = AmazonSimpleEmailServiceClientBuilder.defaultClient();
             final Map<String, List<Task>> uncompleted = new HashMap<>();
             /*
              * Here we're generating a map with the user id and all the tasks
@@ -63,7 +96,7 @@ public class SendTask {
              */
             for (Map.Entry<String, List<Task>> userTasks : uncompleted.entrySet()) {
                 // TODO: check for any error scenario and what we want to return
-                sendMail(userTasks.getKey(), userTasks.getValue(), emailClient);
+                sendMail(userTasks.getKey(), userTasks.getValue());
             }
         }
         return SUCCESS;
@@ -77,7 +110,7 @@ public class SendTask {
      * @param tasks
      *            list of uncompleted tasks
      */
-    private SendEmailResult sendMail(final String email, List<Task> tasks, AmazonSimpleEmailService emailClient) {
+    private SendEmailResult sendMail(final String email, List<Task> tasks) {
         logger.debug(String.format("Sending %d tasks to %s.", tasks.size(), email));
         final Destination destination = new Destination().withToAddresses(email);
         final Content subject = new Content().withData("Uncompleted tasks reminder");
@@ -105,15 +138,12 @@ public class SendTask {
     }
 
     private List<Task> retrieveUncompletedTasks() {
-        final AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
-        final DynamoDBMapper mapper = new DynamoDBMapper(client);
-
         /*
          * After testing looks like if we use eager loading dynamo db takes way
          * more time to return the results, thus I'm iterating on results to
          * make sure I loaded all of them
          */
-        final List<Task> paginatedTasks = mapper.scan(Task.class,
+        final List<Task> paginatedTasks = dynamoMapper.scan(Task.class,
                 new DynamoDBScanExpression().withFilterExpression("attribute_not_exists(completed)"));
 
         final List<Task> result = new LinkedList<>();
