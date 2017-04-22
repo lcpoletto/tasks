@@ -19,7 +19,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 // TODO: maybe use autovalue?
 // https://github.com/google/auto/blob/master/value/userguide/index.md
 @DynamoDBTable(tableName = "tasks")
-public class Task implements Serializable {
+public class Task implements Serializable, Comparable<Task> {
 
     private static final long serialVersionUID = 9210143191071191081L;
 
@@ -57,6 +57,36 @@ public class Task implements Serializable {
         result.append(completed);
         result.append("\" }");
         return result.toString();
+    }
+
+    /**
+     * Compares two tasks based on the following rule: first by the completed
+     * date (descending) and secondly by the priority (ascending). If a task has
+     * not been completed it should go before all other tasks.
+     */
+    @Override
+    public int compareTo(Task o) {
+        if (completed == null) {
+            if (o.completed == null) {
+                return priority.compareTo(o.priority);
+            }
+            // other is completed, this should come first
+            return -1;
+        }
+        // this is completed
+        if (o.completed == null) {
+            // other is not completed, thus it should come first
+            return 1;
+        }
+
+        // both are completed
+        final int dateComparison = completed.compareTo(o.completed);
+        if (dateComparison == 0) {
+            // if they were completed at the same millisecond, priority is the
+            // tie breaker
+            return priority.compareTo(o.priority);
+        }
+        return -dateComparison;
     }
 
     /**
@@ -117,25 +147,6 @@ public class Task implements Serializable {
     }
 
     /**
-     * Getter for completed.
-     *
-     * @return the completed
-     */
-    public Date getCompleted() {
-        return completed;
-    }
-
-    /**
-     * Setter for completed.
-     *
-     * @param completed
-     *            the completed to set
-     */
-    public void setCompleted(Date completed) {
-        this.completed = completed;
-    }
-
-    /**
      * Getter for id.
      *
      * @return the id
@@ -152,5 +163,24 @@ public class Task implements Serializable {
      */
     public void setId(String id) {
         this.id = id;
+    }
+
+    /**
+     * Getter for completed.
+     *
+     * @return the completed
+     */
+    public Date getCompleted() {
+        return completed;
+    }
+
+    /**
+     * Setter for completed.
+     *
+     * @param completed
+     *            the completed to set
+     */
+    public void setCompleted(Date completed) {
+        this.completed = completed;
     }
 }
