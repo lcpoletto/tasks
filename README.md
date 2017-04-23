@@ -1,5 +1,5 @@
 # Task Management API
-This project defines a Task Management API using Java, AWS Lambda, AWS Api Gateware and terraform.
+This project defines a Task Management API using Java, AWS Lambda, AWS Api Gateway and terraform.
 
 ## Getting Started
 After you clone the repo you will need to package the project by using Gradle:
