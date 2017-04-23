@@ -1,9 +1,9 @@
 ---
 swagger: "2.0"
 info:
-  version: "2017-04-22T22:11:48Z"
+  version: "2017-04-23T00:10:07Z"
   title: "tasks"
-host: "56we41fu3e.execute-api.us-east-1.amazonaws.com"
+host: "8gqbzvu8pe.execute-api.us-east-1.amazonaws.com"
 basePath: "/development"
 schemes:
 - "https"
@@ -28,9 +28,17 @@ paths:
               type: "string"
         400:
           description: "400 response"
+        500:
+          description: "500 response"
       x-amazon-apigateway-request-validator: "Validate body"
       x-amazon-apigateway-integration:
         responses:
+          ? (
+
+            |.)+
+          : statusCode: "500"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
           default:
             statusCode: "201"
             responseParameters:
@@ -57,11 +65,19 @@ paths:
       - "application/json"
       produces:
       - "application/json"
+      parameters:
+      - in: "body"
+        name: "note"
+        required: true
+        schema:
+          $ref: "#/definitions/note"
       responses:
         200:
           description: "200 response"
         400:
           description: "400 response"
+        500:
+          description: "500 response"
         403:
           description: "403 response"
         404:
@@ -69,6 +85,12 @@ paths:
       x-amazon-apigateway-request-validator: "Validate body"
       x-amazon-apigateway-integration:
         responses:
+          ? (
+
+            |.)+
+          : statusCode: "500"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
           .*ValidationException.*:
             statusCode: "400"
             responseTemplates:
@@ -108,8 +130,16 @@ paths:
           description: "200 response"
           schema:
             $ref: "#/definitions/task"
+        500:
+          description: "500 response"
       x-amazon-apigateway-integration:
         responses:
+          ? (
+
+            |.)+
+          : statusCode: "500"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
           default:
             statusCode: "200"
             responseTemplates:
@@ -143,9 +173,17 @@ paths:
               type: "string"
         400:
           description: "400 response"
+        500:
+          description: "500 response"
       x-amazon-apigateway-request-validator: "Validate body"
       x-amazon-apigateway-integration:
         responses:
+          ? (
+
+            |.)+
+          : statusCode: "500"
+            responseTemplates:
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
           default:
             statusCode: "201"
             responseParameters:
@@ -171,24 +209,38 @@ paths:
       - "application/json"
       produces:
       - "application/json"
+      parameters:
+      - in: "body"
+        name: "task"
+        required: true
+        schema:
+          $ref: "#/definitions/task"
       responses:
         200:
           description: "200 response"
         400:
           description: "400 response"
+        500:
+          description: "500 response"
         404:
           description: "404 response"
       x-amazon-apigateway-request-validator: "Validate body"
       x-amazon-apigateway-integration:
         responses:
-          default:
-            statusCode: "200"
+          ? (
+
+            |.)+
+          : statusCode: "500"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$'))\n{ }\n"
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
           .*ValidationException.*:
             statusCode: "400"
             responseTemplates:
               application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
+          default:
+            statusCode: "200"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{ }\n"
           .*ObjectNotFoundException.*:
             statusCode: "404"
             responseTemplates:
@@ -213,18 +265,26 @@ paths:
           description: "200 response"
         400:
           description: "400 response"
+        500:
+          description: "500 response"
         404:
           description: "404 response"
       x-amazon-apigateway-integration:
         responses:
-          default:
-            statusCode: "200"
+          ? (
+
+            |.)+
+          : statusCode: "500"
             responseTemplates:
-              application/json: "#set($inputRoot = $input.path('$'))\n{ }\n"
+              application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
           .*ValidationException.*:
             statusCode: "400"
             responseTemplates:
               application/json: "{ \"error\": \"$input.path('$.errorMessage')\" }\n"
+          default:
+            statusCode: "200"
+            responseTemplates:
+              application/json: "#set($inputRoot = $input.path('$'))\n{ }\n"
           .*ObjectNotFoundException.*:
             statusCode: "404"
             responseTemplates:

@@ -102,3 +102,26 @@ resource "aws_api_gateway_integration_response" "tasks_put_400_integration_respo
 EOF
     }
 }
+
+resource "aws_api_gateway_method_response" "tasks_put_500_response" {
+	rest_api_id = "${aws_api_gateway_rest_api.tasks_api.id}"
+    resource_id = "${aws_api_gateway_resource.task_detail_resource.id}"
+    http_method = "${aws_api_gateway_method.tasks_put_method.http_method}"
+    status_code = 500
+}
+
+resource "aws_api_gateway_integration_response" "tasks_put_500_integration_response" {
+    rest_api_id = "${aws_api_gateway_rest_api.tasks_api.id}"
+    resource_id = "${aws_api_gateway_resource.task_detail_resource.id}"
+    http_method = "${aws_api_gateway_method.tasks_put_method.http_method}"
+    status_code = "${aws_api_gateway_method_response.tasks_put_500_response.status_code}"
+    selection_pattern = "(\n|.)+"
+
+    depends_on = ["aws_api_gateway_integration.tasks_put_integration"]
+
+    response_templates {
+        "application/json" = <<EOF
+{ "error": "$input.path('$.errorMessage')" }
+EOF
+    }
+}
